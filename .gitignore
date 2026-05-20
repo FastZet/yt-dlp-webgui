@@ -30,3 +30,16 @@ go.work.sum
 # Editor/IDE
 # .idea/
 # .vscode/
+
+# Downloaded video files
+data/downloads/
+
+# Extracted custom yt-dlp zip
+data/custom-ytdlp/
+
+# Uploaded zip files
+data/uploads/
+
+# OS junk
+.DS_Store
+Thumbs.db
