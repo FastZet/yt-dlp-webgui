@@ -1,0 +1,49 @@
+version: "3.9"
+
+services:
+  yt-dlp-webgui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: yt-dlp-webgui
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      APP_ENV: production
+      APP_ADDR: ":8080"
+      DATA_DIR: /app/data
+      DOWNLOADS_DIR: /app/data/downloads
+      CUSTOM_RUNTIME_DIR: /app/data/runtime/custom
+      UPLOADS_DIR: /app/data/uploads
+      LOGS_DIR: /app/data/logs
+      OFFICIAL_YTDLP_PATH: /usr/local/bin/yt-dlp
+      PYTHON_BIN: python3
+      FFMPEG_BIN: ffmpeg
+      FFPROBE_BIN: ffprobe
+    volumes:
+      - ./data:/app/data
+    networks:
+      - traefik-public
+    labels:
+      - traefik.enable=true
+
+      # Router
+      - traefik.http.routers.ytdlp-webgui.rule=Host(`yt.example.com`)
+      - traefik.http.routers.ytdlp-webgui.entrypoints=websecure
+      - traefik.http.routers.ytdlp-webgui.tls=true
+      - traefik.http.routers.ytdlp-webgui.tls.certresolver=letsencrypt
+
+      # Service
+      - traefik.http.services.ytdlp-webgui.loadbalancer.server.port=8080
+
+      # Optional redirect if your Traefik setup uses a plain HTTP entrypoint
+      - traefik.http.routers.ytdlp-webgui-http.rule=Host(`yt.example.com`)
+      - traefik.http.routers.ytdlp-webgui-http.entrypoints=web
+      - traefik.http.routers.ytdlp-webgui-http.middlewares=ytdlp-webgui-https-redirect
+      - traefik.http.middlewares.ytdlp-webgui-https-redirect.redirectscheme.scheme=https
+
+networks:
+  traefik-public:
+    external: true
+    
